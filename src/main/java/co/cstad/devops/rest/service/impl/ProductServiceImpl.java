@@ -1,6 +1,7 @@
 package co.cstad.devops.rest.service.impl;
 
 import co.cstad.devops.rest.dto.ProductCreateRequest;
+import co.cstad.devops.rest.dto.ProductEditRequest;
 import co.cstad.devops.rest.dto.ProductResponse;
 import co.cstad.devops.rest.model.Product;
 import co.cstad.devops.rest.service.ProductService;
@@ -96,5 +97,21 @@ public class ProductServiceImpl implements ProductService {
         newProduct.setImportedDate(LocalDateTime.now());
         newProduct.setStatus(true);
         productList.add(newProduct);
+    }
+
+    @Override
+    public void editProductByUuid(String uuid, ProductEditRequest request) {
+        long count = productList.stream()
+                .filter(product -> product.getUuid().equals(uuid))
+                .peek(oldProduct -> {
+                    oldProduct.setName(request.name());
+                    oldProduct.setPrice(request.price());
+                }).count();
+        System.out.println("Affected row: "+count);
+    }
+
+    @Override
+    public void deleteProductByUuid(String uuid) {
+        productList.removeIf(product -> product.getUuid().equals(uuid));
     }
 }

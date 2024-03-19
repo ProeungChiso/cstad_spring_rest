@@ -1,6 +1,7 @@
 package co.cstad.devops.rest.controller;
 
 import co.cstad.devops.rest.dto.ProductCreateRequest;
+import co.cstad.devops.rest.dto.ProductEditRequest;
 import co.cstad.devops.rest.service.impl.ProductServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -38,5 +39,13 @@ public class ProductController {
     @PostMapping()
     void createNewProduct(@RequestBody ProductCreateRequest request){
         productService.createNewProduct(request);
+    }
+    @PutMapping("/edit/{uuid}")
+    void editProductByUuid(@PathVariable String uuid, @RequestBody ProductEditRequest request){
+        productService.editProductByUuid(uuid, request);
+    }
+    @DeleteMapping("/delete/{uuid}")
+    void deleteProductByUuid(@PathVariable String uuid){
+        productService.deleteProductByUuid(uuid);
     }
 }
