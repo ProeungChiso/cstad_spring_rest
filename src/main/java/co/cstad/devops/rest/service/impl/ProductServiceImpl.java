@@ -113,5 +113,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteProductByUuid(String uuid) {
         productList.removeIf(product -> product.getUuid().equals(uuid));
+        System.out.println("Delete Successful");
     }
 }

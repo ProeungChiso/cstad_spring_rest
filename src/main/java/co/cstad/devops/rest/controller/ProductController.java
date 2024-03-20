@@ -29,7 +29,7 @@ public class ProductController {
                 "data",productService.getProductById(id)
         );
     }
-    @GetMapping("/uuid/{uuid}")
+    @GetMapping("/{uuid}")
     Map<String, Object> getProductByUuid(@PathVariable String uuid){
         return Map.of(
                 "data",productService.getProductByUuid(uuid)
@@ -40,11 +40,11 @@ public class ProductController {
     void createNewProduct(@RequestBody ProductCreateRequest request){
         productService.createNewProduct(request);
     }
-    @PutMapping("/edit/{uuid}")
+    @PutMapping("/{uuid}")
     void editProductByUuid(@PathVariable String uuid, @RequestBody ProductEditRequest request){
         productService.editProductByUuid(uuid, request);
     }
-    @DeleteMapping("/delete/{uuid}")
+    @DeleteMapping("/{uuid}")
     void deleteProductByUuid(@PathVariable String uuid){
         productService.deleteProductByUuid(uuid);
     }

@@ -13,4 +13,5 @@ public interface ProductService {
     void editProductByUuid(String uuid, ProductEditRequest request);
     void deleteProductByUuid(String uuid);
 
+
 }
