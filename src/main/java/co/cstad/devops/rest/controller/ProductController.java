@@ -29,7 +29,7 @@ public class ProductController {
                 "data",productService.getProductById(id)
         );
     }
-    @GetMapping("/{uuid}")
+    @GetMapping("/uuid/{uuid}")
     Map<String, Object> getProductByUuid(@PathVariable String uuid){
         return Map.of(
                 "data",productService.getProductByUuid(uuid)
@@ -44,6 +44,7 @@ public class ProductController {
     void editProductByUuid(@PathVariable String uuid, @RequestBody ProductEditRequest request){
         productService.editProductByUuid(uuid, request);
     }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{uuid}")
     void deleteProductByUuid(@PathVariable String uuid){
         productService.deleteProductByUuid(uuid);
