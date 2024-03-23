@@ -18,40 +18,44 @@ public class ProductController {
     private final ProductServiceImpl productService;
 
     @GetMapping
-    ResponseEntity<?> findProducts(@RequestParam(required = false, defaultValue = "") String name,
-                                   @RequestParam(required = false, defaultValue = "true") Boolean status) {
-
-        Map<String, Object> data = Map.of(
-                "message", "Products have been found",
-                "data", productService.getProducts(name, status));
-        //return new ResponseEntity<>(data, HttpStatus.NO_CONTENT);
-        return ResponseEntity.accepted().body(data);
+    ResponseEntity<?> findProduct(@RequestParam(required = false, defaultValue = "") String name,
+                                  @RequestParam(required = false, defaultValue = "true") Boolean status) {
+        return ResponseEntity.accepted().body(
+                Map.of(
+                        "data", productService.findProducts(name, status)
+                )
+        );
     }
-
     @GetMapping("/{id}")
-    Map<String, Object> getProductById(@PathVariable Integer id){
-        return Map.of(
-                "data",productService.getProductById(id)
+    ResponseEntity<?> findProductById(@PathVariable Integer id) {
+        return ResponseEntity.accepted().body(
+                Map.of(
+                        "data", productService.findProductById(id)
+                )
         );
     }
     @GetMapping("/uuid/{uuid}")
-    Map<String, Object> getProductByUuid(@PathVariable String uuid){
-        return Map.of(
-                "data",productService.getProductByUuid(uuid)
+    ResponseEntity<?> findProductByUuid(@PathVariable String uuid) {
+        return ResponseEntity.accepted().body(
+                Map.of(
+                        "data",productService.findProductByUuid(uuid)
+                )
         );
     }
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping()
+    @PostMapping
     void createNewProduct(@Valid @RequestBody ProductCreateRequest request){
         productService.createNewProduct(request);
     }
-    @PutMapping("/{uuid}")
-    void editProductByUuid(@PathVariable String uuid, @RequestBody ProductEditRequest request){
-        productService.editProductByUuid(uuid, request);
+
+    @PutMapping("/{id}")
+    void editProductById(@PathVariable Integer id, @Valid @RequestBody ProductEditRequest request){
+        productService.editProductById(id, request);
     }
+
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{uuid}")
-    void deleteProductByUuid(@PathVariable String uuid){
-        productService.deleteProductByUuid(uuid);
+    @DeleteMapping("/{id}")
+    void deleteProductById(@PathVariable Integer id) {
+        productService.deleteProductById(id);
     }
 }

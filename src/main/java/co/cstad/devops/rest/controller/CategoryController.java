@@ -1,14 +1,19 @@
 package co.cstad.devops.rest.controller;
 
+import co.cstad.devops.rest.dto.CategoryRequest;
+import co.cstad.devops.rest.dto.CategoryResponse;
 import co.cstad.devops.rest.model.Product;
+import co.cstad.devops.rest.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,22 +21,58 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/categories")
+@RequiredArgsConstructor
 public class CategoryController {
+    private final CategoryService categoryService;
     @Operation(summary = "Get all categories")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the categories",
+            @ApiResponse(responseCode = "200", description = "found the categories",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Product.class)) }),
-            @ApiResponse(responseCode = "400", description = "Invalid id supplied",
-                    content = @Content),
-            @ApiResponse(responseCode = "404", description = "Categories not found",
-                    content = @Content) })
+                            schema = @Schema(implementation = Product.class))}),
+            @ApiResponse(responseCode = "400", description = "Categories not found",
+                    content = @Content)
+    })
     @GetMapping
-    Map<String, Object> findCategories() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("message", "Categories have been found successfully");
-        data.put("data", List.of("Education", "Entertainment"));
-        return data;
+    ResponseEntity<?> findCategories(){
+        return ResponseEntity.accepted().body(
+                Map.of(
+                        "data", categoryService.findCategories()
+                )
+        );
+    }
+
+    @GetMapping("/name/{name}")
+    ResponseEntity<?> findCategoryByName(@PathVariable String name) {
+        return ResponseEntity.accepted().body(
+                Map.of(
+                        "data",categoryService.findCategoryByName(name)
+                )
+        );
+    }
+
+    @GetMapping("/{id}")
+    ResponseEntity<?> findCategoryById(@PathVariable Integer id){
+        return ResponseEntity.accepted().body(
+                Map.of(
+                        "data", categoryService.findCategoryById(id)
+                )
+        );
+    }
+
+    @PostMapping
+    void createNewCategory(@Valid @RequestBody CategoryRequest categoryRequest){
+        categoryService.createNewCategory(categoryRequest);
+    }
+
+    @PutMapping("/{id}")
+    CategoryResponse editCategoryById(@PathVariable Integer id,@Valid @RequestBody CategoryRequest request) {
+        return categoryService.editCategoryById(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteCategoryById(@PathVariable Integer id) {
+        categoryService.deleteCategoryById(id);
     }
 
 }

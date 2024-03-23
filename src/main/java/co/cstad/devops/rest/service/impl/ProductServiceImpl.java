@@ -4,8 +4,13 @@ import co.cstad.devops.rest.dto.ProductCreateRequest;
 import co.cstad.devops.rest.dto.ProductEditRequest;
 import co.cstad.devops.rest.dto.ProductResponse;
 import co.cstad.devops.rest.model.Product;
+import co.cstad.devops.rest.repository.ProductRepository;
 import co.cstad.devops.rest.service.ProductService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,43 +19,15 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
-    private final List<Product> productList;
-    public ProductServiceImpl(){
-        productList = new ArrayList<>();
-        Product p1 = new Product();
-        p1.setId(1);
-        p1.setUuid(UUID.randomUUID().toString());
-        p1.setName("IPhone 12 Pro Max");
-        p1.setPrice(829.90);
-        p1.setQty(2);
-        p1.setImportedDate(LocalDateTime.now());
-        p1.setStatus(true);
-        Product p2 = new Product();
-        p2.setId(1);
-        p2.setUuid(UUID.randomUUID().toString());
-        p2.setName("IPhone 14 Pro Max");
-        p2.setPrice(1199.90);
-        p2.setQty(4);
-        p2.setImportedDate(LocalDateTime.now());
-        p2.setStatus(true);
-        Product p3 = new Product();
-        p3.setId(1);
-        p3.setUuid(UUID.randomUUID().toString());
-        p3.setName("Macbook Pro M2");
-        p3.setPrice(2199.90);
-        p3.setQty(10);
-        p3.setImportedDate(LocalDateTime.now());
-        p3.setStatus(true);
-        productList.add(p1);
-        productList.add(p2);
-        productList.add(p3);
 
-    }
-
+    private final ProductRepository productRepository;
 
     @Override
-    public List<ProductResponse> getProducts(String name, Boolean status) {
+    public List<ProductResponse> findProducts(String name, Boolean status) {
+        List<Product> productList = productRepository.findAll();
         return productList.stream()
                 .filter(product -> product.getName().toLowerCase().contains(name) && product.getStatus().equals(status))
                 .map(product -> new ProductResponse(
@@ -62,57 +39,57 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toList());
     }
     @Override
-    public ProductResponse getProductById(Integer id) {
-        return productList.stream()
-                .filter(product -> product.getId().equals(id))
-                .map(product -> new ProductResponse(
-                        product.getUuid(),
-                        product.getName(),
-                        product.getPrice(),
-                        product.getQty()
-                )).findFirst().orElseThrow();
+    public ProductResponse findProductById(Integer id) {
+        Product product = productRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Product has not been found"
+                )
+        );
+        return new ProductResponse(
+                product.getUuid(),
+                product.getName(),
+                product.getPrice(),
+                product.getQty());
     }
-
     @Override
-    public ProductResponse getProductByUuid(String uuid) {
-        return productList.stream()
-                .filter(product -> product.getUuid().equals(uuid))
-                .map(product -> new ProductResponse(
-                        product.getUuid(),
-                        product.getName(),
-                        product.getPrice(),
-                        product.getQty()
-                ))
-                .findFirst().orElseThrow();
+    public ProductResponse findProductByUuid(String uuid) {
+        return productRepository.findByUuid(uuid);
     }
 
     @Override
     public void createNewProduct(ProductCreateRequest request) {
-        Product newProduct = new Product();
-        newProduct.setId(productList.size());
-        newProduct.setUuid(UUID.randomUUID().toString());
-        newProduct.setName(request.name());
-        newProduct.setPrice(request.price());
-        newProduct.setQty(request.qty());
-        newProduct.setImportedDate(LocalDateTime.now());
-        newProduct.setStatus(true);
-        productList.add(newProduct);
+        Product product = new Product();
+        product.setUuid(UUID.randomUUID().toString());
+        product.setName(request.name());
+        product.setPrice(request.price());
+        product.setQty(request.qty());
+        product.setImportedDate(LocalDateTime.now());
+        product.setStatus(true);
+        productRepository.save(product);
     }
 
     @Override
-    public void editProductByUuid(String uuid, ProductEditRequest request) {
-        long count = productList.stream()
-                .filter(product -> product.getUuid().equals(uuid))
-                .peek(oldProduct -> {
-                    oldProduct.setName(request.name());
-                    oldProduct.setPrice(request.price());
-                }).count();
-        System.out.println("Affected row: "+count);
+    public void editProductById(Integer id, ProductEditRequest request) {
+        Product product = productRepository.findById(id).orElseThrow(()->
+                new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Product has not been found"
+                )
+        );
+        product.setName(request.name());
+        product.setPrice(request.price());
+        productRepository.save(product);
     }
 
     @Override
-    public void deleteProductByUuid(String uuid) {
-        productList.removeIf(product -> product.getUuid().equals(uuid));
-        System.out.println("Delete Successful");
+    public void deleteProductById(Integer id) {
+        if (!productRepository.existsById(id)){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Product has not been found"
+            );
+        }
+        productRepository.deleteById(id);
     }
 }

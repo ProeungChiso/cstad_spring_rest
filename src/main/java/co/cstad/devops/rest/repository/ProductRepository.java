@@ -1,8 +1,9 @@
 package co.cstad.devops.rest.repository;
 
-import org.springframework.stereotype.Repository;
+import co.cstad.devops.rest.dto.ProductResponse;
+import co.cstad.devops.rest.model.Product;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
-public class ProductRepository {
-
+public interface ProductRepository extends JpaRepository<Product, Integer>{
+    ProductResponse findByUuid(String uuid);
 }
